@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculadora de Depreciación</title>
+    <style>
+        /* Estilos CSS para la calculadora */
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f0f0;
+        }
+
+        .container {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .calculator {
+            background-color: #ffffff;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        label {
+            display: inline-block;
+            margin-bottom: 10px;
+        }
+
+        select, input[type="number"], input[type="text"], input[type="date"] {
+            padding: 6px;
+            width: 100%;
+            margin-bottom: 20px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            margin: 10px;
+            background-color: #007BFF;
+            color: #ffffff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        /* Estilos CSS para la tabla de resultados */
+        table {
+            border-collapse: collapse;
+            width: 80%;
+            margin: 20px auto;
+            background-color: #ffffff;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        table, th, td {
+            border: 1px solid #ccc;
+        }
+
+        th, td {
+            padding: 8px;
+            text-align: center;
+        }
+
+        th {
+            background-color: #f2f2f2;
+        }
+    </style>
+</head>
+<body>
+    <h1>Calculadora de Depreciación del Activo Fijo</h1>
+    <div class="container">
+        <div class="calculator">
+            <label for="descripcion">Descripción del Activo:</label>
+            <input type="text" id="descripcion" required>
+            
+            <label for="clase">Clase del Activo:</label>
+            <select id="clase" required>
+                <option value="Maquinas">Maquinas</option>
+                <option value="Inmuebles">Inmuebles</option>
+                <option value="Muebles y enseres">Muebles y enseres</option>
+                <option value="Vehiculos">Vehiculos</option>
+                <option value="Equipos Informaticos">Equipos Informaticos</option>
+            </select>
+            
+            <label for="tipoDepreciacion">Tipo de Depreciación:</label>
+            <select id="tipoDepreciacion">
+                <option value="Metodo Lineal">Método Lineal</option>
+                <option value="Depreciación Decreciente">Depreciación Decreciente</option>
+            </select>
+            
+            <label for="costo">Costo de Adquisición:</label>
+            <input type="number" id="costo" required>
+            
+            <label for="fecha">Fecha de Adquisición:</label>
+            <input type="date" id="fecha" required>
+            
+            <label for="tasa">Tasa de Depreciación:</label>
+            <select id="tasa">
+                <option value="0.05">5%</option>
+                <option value="0.10">10%</option>
+                <option value="0.20">20%</option>
+                <option value="0.25">25%</option>
+                <option value="0.50">50%</option>
+            </select>
+            
+            <label for="residual">Valor Residual:</label>
+            <input type="number" id="residual" required>
+            
+            <label for="vida">Vida Útil:</label>
+            <select id="vida">
+                <option value="2">2 años</option>
+                <option value="4">4 años</option>
+                <option value="5">5 años</option>
+                <option value="10">10 años</option>
+                <option value="20">20 años</option>
+            </select>
+            
+            <button onclick="calcularDepreciacion()">Calcular</button>
+            <button onclick="limpiarTabla()">Limpiar</button>
+            <button onclick="exportarTabla()">Exportar</button>
+        </div>
+    </div>
+
+    <table id="resultado">
+        <tr>
+            <th>Años</th>
+            <th>Cuota Depreciación</th>
+            <th>Depreciación Acumulada</th>
+            <th>Valor Neto en Libros</th>
+        </tr>
+    </table>
+
+    <script>
+        function calcularDepreciacion() {
+            // Obtener valores de entrada
+            const descripcion = document.getElementById("descripcion").value;
+            const clase = document.getElementById("clase").value;
+            const tipoDepreciacion = document.getElementById("tipoDepreciacion").value;
+            const costo = parseFloat(document.getElementById("costo").value);
+            const fecha = document.getElementById("fecha").value;
+            const tasa = parseFloat(document.getElementById("tasa").value);
+            const residual = parseFloat(document.getElementById("residual").value);
+            const vida = parseInt(document.getElementById("vida").value);
+
+            // Calcular cuota de depreciación
+            let cuotaDepreciacion;
+            let depreciacionAcumulada = 0;
+            const tabla = document.getElementById("resultado");
+            tabla.innerHTML = "<tr><th>Años</th><th>Cuota Depreciación</th><th>Depreciación Acumulada</th><th>Valor Neto en Libros</th></tr>";
+
+            if (tipoDepreciacion === "Metodo Lineal") {
+                // Calcular cuota de depreciación lineal
+                cuotaDepreciacion = (costo - residual) / vida;
+
+                for (let i = 1; i <= vida; i++) {
+                    depreciacionAcumulada += cuotaDepreciacion;
+                    const valorNetoLibros = costo - depreciacionAcumulada;
+                    const row = `<tr><td>${i}</td><td>${cuotaDepreciacion.toFixed(2)}</td><td>${depreciacionAcumulada.toFixed(2)}</td><td>${valorNetoLibros.toFixed(2)}</td></tr>`;
+                    tabla.innerHTML += row;
+                }
+            } else if (tipoDepreciacion === "Depreciación Decreciente") {
+                // Calcular cuota de depreciación decreciente
+                let sumatoriaAnios = 0;
+                let porcentajeDepreciacion = 0;
+                for (let i = 1; i <= vida; i++) {
+                    sumatoriaAnios += i;
+                }
+
+                for (let i = 1; i <= vida; i++) {
+                    porcentajeDepreciacion = (vida - i + 1) / sumatoriaAnios;
+                    cuotaDepreciacion = (costo - residual) * porcentajeDepreciacion;
+
+                    if (i === 1) {
+                        depreciacionAcumulada = cuotaDepreciacion;
+                    } else {
+                        depreciacionAcumulada += cuotaDepreciacion;
+                    }
+
+                    const valorNetoLibros = costo - depreciacionAcumulada;
+                    const row = `<tr><td>${i}</td><td>${cuotaDepreciacion.toFixed(2)}</td><td>${depreciacionAcumulada.toFixed(2)}</td><td>${valorNetoLibros.toFixed(2)}</td></tr>`;
+                    tabla.innerHTML += row;
+                }
+            }
+        }
+
+        function limpiarTabla() {
+            const tabla = document.getElementById("resultado");
+            tabla.innerHTML = "<tr><th>Años</th><th>Cuota Depreciación</th><th>Depreciación Acumulada</th><th>Valor Neto en Libros</th></tr>";
+        }
+
+        function exportarTabla() {
+            const tabla = document.getElementById("resultado");
+            const rows = tabla.getElementsByTagName("tr");
+            let data = "";
+
+            for (let i = 0; i < rows.length; i++) {
+                const cells = rows[i].getElementsByTagName("td");
+                for (let j = 0; j < cells.length; j++) {
+                    data += cells[j].textContent;
+                    if (j < cells.length - 1) {
+                        data += "|";
+                    }
+                }
+                data += "\n";
+            }
+
+            // Crear un enlace de descarga
+            const blob = new Blob([data], { type: "text/plain" });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement("a");
+            a.href = url;
+            a.download = "depreciacion.txt";
+            a.click();
+        }
+    </script>
+</body>
+</html>
